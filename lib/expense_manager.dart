@@ -1,8 +1,25 @@
 import 'models/expense.dart';
+import 'storage_service.dart';
 
 class ExpenseManager {
   final List<Expense> _expenses = [];
   int _nextId = 1;
+  final StorageService _storage;
+
+  ExpenseManager({StorageService? storage})
+    : _storage = storage ?? StorageService();
+  
+  void load() {
+    final loaded = _storage.loadExpenses();
+    _expenses.addAll(loaded);
+    if (loaded.isNotEmpty) {
+      _nextId = loaded.map((e) => e.id).reduce((a, b) => a > b ? a : b) + 1;
+    }
+  }
+
+  void _save() {
+    _storage.saveExpenses(_expenses);
+  }
 
   void addExpense({
     required double amount,
@@ -18,6 +35,7 @@ class ExpenseManager {
       date: date,
     );
     _expenses.add(expense);
+    _save();
   }
 
   List<Expense> getAllExpenses() => List.unmodifiable(_expenses);
@@ -26,6 +44,7 @@ class ExpenseManager {
     final index = _expenses.indexWhere((e) => e.id == id);
     if (index == -1) return false;
     _expenses.removeAt(index);
+    _save();
     return true;
   }
 
