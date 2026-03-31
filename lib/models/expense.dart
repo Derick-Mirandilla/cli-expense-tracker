@@ -37,6 +37,6 @@ class Expense {
 
   @override
   String toString() {
-    return '[${category.name.toUpperCase()}] $description — \$${amount.toStringAsFixed(2)} on ${date.toLocal().toString().split(' ')[0]}';
+    return '[${category.name.toUpperCase()}] $description — \₱${amount.toStringAsFixed(2)} on ${date.toLocal().toString().split(' ')[0]}';
   }
 }
