@@ -64,25 +64,20 @@ void categoryPrinter() {
   }
 }
 
-Category switchChoice (int choice) {
-  switch (choice) {
-      case 1:
-        return Category.food;
-      case 2:
-        return Category.transport;
-      case 3:
-        return Category.entertainment;
-      case 4:
-        return Category.health;
-      default:
-        return Category.other;
-    }
+Category? switchChoice (int choice) {
+  final index = choice - 1; 
+  if (index < 0 || index >= Category.values.length) return null;
+  return Category.values[index];
 }
 
 void handleAdd(ExpenseManager m) {
   final amount = readDouble('Enter amount: ');
   categoryPrinter();
   final category = switchChoice(readInt('Enter category number: '));
+  if (category == null) {
+    print('Invalid category.');
+    return;
+  }
   final description = readString('Enter description: ');
   m.addExpense(amount: amount, category: category, description: description);
   print('Expense added successfully!');
@@ -100,11 +95,13 @@ void handleView(ExpenseManager m) {
 }
 
 void handleFilter(ExpenseManager m) {
-  int choice;
   while (true) {
     categoryPrinter();
-    choice = readInt('Enter category number: ');
-    final category = switchChoice(choice);
+    final category = switchChoice(readInt('Enter category number: '));
+    if (category == null) {
+      print('Invalid category.');
+      return;
+    }
     final expenses = m.filterByCategory(category);
 
     if (expenses.isNotEmpty) {
@@ -112,10 +109,10 @@ void handleFilter(ExpenseManager m) {
       for (final expense in expenses) {
         print(expense);
       } 
-      break;
+      return;
     } else {
       print('No expense found for ${category.name}');
-      break;
+      return;
     }
   }
 }
@@ -124,7 +121,7 @@ void handleDelete(ExpenseManager m) {
   int id = readInt('Enter expense ID to delete: ');
   final result = m.deleteExpense(id);
 
-  if (result == false) {
+  if (!result) {
     print('Expense with ID $id not found.');
   } else {
     print('Expense deleted successfully');
@@ -134,7 +131,7 @@ void handleDelete(ExpenseManager m) {
 
 void handleSummary(ExpenseManager m) {
   print('--- SUMMARY ---');
-  print('Total spent: \₱${m.getTotalSpent()}');
+  print('Total spent: ₱${m.getTotalSpent().toStringAsFixed(2)}');
 
   print('Breakdown by category');
   final expenses = m.getSummary();
@@ -142,7 +139,7 @@ void handleSummary(ExpenseManager m) {
   for (final expense in expenses.keys) {
     final amount  =expenses[expense];
     if (amount != 0) {
-      print('${expense.name}\t\₱$amount');
+      print('${expense.name}\t₱${amount?.toStringAsFixed(2)}');
     } 
   }
 }
